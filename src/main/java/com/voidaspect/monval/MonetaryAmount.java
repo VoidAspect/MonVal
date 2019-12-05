@@ -5,6 +5,9 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Currency;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * This utility converts various data types to and from the monetary amount,
  * which is represented as a 64-bit integer value.
@@ -30,12 +33,12 @@ public final class MonetaryAmount {
     public static long parse(CharSequence value) {
         int size = value.length();
         if (size == 0) throw new NumberFormatException("Can't parse monetary amount, string is empty");
-        int i = 0;
+        int i;
         char current;
         boolean negative = false;
         long integerPart = 0;
         //skipping non-digit characters, such as $ or EUR
-        for (; i < size; i++) {
+        for (i = 0; i < size; i++) {
             current = value.charAt(i);
             int digit = digit(current);
             if (digit != -1) {
@@ -48,33 +51,34 @@ public final class MonetaryAmount {
                 throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             }
         }
-        if (i == size) throw new NumberFormatException("Can't parse monetary amount, string contains no digits");
+        if (i == size) {
+            throw new NumberFormatException("Can't parse monetary amount, string '" + value + "' contains no digits");
+        }
         // parsing integer part
         for (i++; i < size; i++) {
             current = value.charAt(i);
             if (current == '.') break;
-            if (current == ' ' || current == ',') continue;
             int digit = digit(current);
-            if (digit == -1) return (negative ? -integerPart : integerPart) * 100;
-            integerPart = integerPart * 10 + digit;
+            if (digit == -1) {
+                if (current != ' ' && current != ',') return (negative ? -integerPart : integerPart) * 100;
+            } else {
+                integerPart = integerPart * 10 + digit;
+            }
         }
         // parsing decimal part
         int decimalPart = 0;
         int decimalDigits = size - i - 1;
-        switch (Math.min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
+        switch (min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
             case 2:
                 current = value.charAt(i + 2);
-                decimalPart = Math.max(digit(current), 0);
+                decimalPart = max(digit(current), 0);
             case 1:
                 current = value.charAt(i + 1);
-                decimalPart += Math.max(digit(current), 0) * 10;
+                decimalPart += max(digit(current), 0) * 10;
         }
-        // calculating amount, applying - sign if negative
+        // calculating amount
         long amount = integerPart * 100 + decimalPart;
-        if (negative) {
-            amount = -amount;
-        }
-        return amount;
+        return negative ? -amount : amount;
     }
 
     public static String toString(long amount) {
