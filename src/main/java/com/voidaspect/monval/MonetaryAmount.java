@@ -36,18 +36,15 @@ public final class MonetaryAmount {
         //skipping non-digit characters, such as $ or EUR
         for (; i < size; i++) {
             char c = value.charAt(i);
-            // parsing sign
-            if (c == '-') {
-                if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
-                negative = true;
-                continue;
-            }
-            if (c == '.')
-                throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             int digit = Character.digit(c, 10);
             if (digit != -1) {
                 integerPart = digit;
                 break;
+            } else if (c == '-') { // parsing sign
+                if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
+                negative = true;
+            } else if (c == '.') {
+                throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             }
         }
         if (i == size) throw new NumberFormatException("Can't parse monetary amount, string contains no digits");
