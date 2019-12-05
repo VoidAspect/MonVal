@@ -21,7 +21,7 @@ List of supported data types:
 The most convenient way of representing monetary data is creating a compound data-type which would provide a clear API
 for value, currency codes, etc. There are several libraries with such functionality, such as Joda-Money.
 
-This particular utility, however, caters to the cases where performance and memory consumption is more important, than
+This particular utility, however, caters to the cases where performance and memory consumption is more important than
 API convenience. Thus, it avoids heap allocations wherever possible, and intentionally limits things like 
 allowed formats for parsable strings.
  
