@@ -75,12 +75,6 @@ public final class MonetaryAmount {
         return amount;
     }
 
-    private static int digit(char c) {
-        int digit = Character.digit(c, 10);
-        if (digit == -1) throw new NumberFormatException(c + " is not a valid digit");
-        return digit;
-    }
-
     public static String toString(long amount) {
         StringBuilder sb = new StringBuilder();
         if (amount < 0) {
@@ -88,15 +82,8 @@ public final class MonetaryAmount {
             amount = -amount;
         }
         sb.append(amount / 100).append('.');
-        long decimalPart = amount % 100;
-        if (decimalPart == 0) {
-            sb.append("00");
-        } else {
-            if (decimalPart < 10) {
-                sb.append('0');
-            }
-            sb.append(decimalPart);
-        }
+        int decimalPart = (int) (amount % 100);
+        sb.append(digit(decimalPart / 10)).append(digit(decimalPart % 10));
         return sb.toString();
     }
 
@@ -134,6 +121,16 @@ public final class MonetaryAmount {
 
     public static long from(int amount) {
         return amount * 100L;
+    }
+
+    private static char digit(int digit) {
+        return Character.forDigit(digit, 10);
+    }
+
+    private static int digit(char c) {
+        int digit = Character.digit(c, 10);
+        if (digit == -1) throw new NumberFormatException(c + " is not a valid digit");
+        return digit;
     }
 
 }
