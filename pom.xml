@@ -9,10 +9,14 @@
     <version>1.0</version>
     <packaging>jar</packaging>
 
+    <name>MonVal</name>
+
     <description>
         A utility to convert various data types to and from the monetary amount,
         which is represented as a 64-bit integer value
     </description>
+
+    <url>https://github.com/VoidAspect/MonVal</url>
 
     <inceptionYear>2019</inceptionYear>
 
@@ -29,6 +33,18 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/VoidAspect/MonVal.git</connection>
+        <developerConnection>scm:git:git@github.com:VoidAspect/MonVal.git</developerConnection>
+        <url>https://github.com/VoidAspect/MonVal/tree/master</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/VoidAspect/MonVal/issues</url>
+    </issueManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
