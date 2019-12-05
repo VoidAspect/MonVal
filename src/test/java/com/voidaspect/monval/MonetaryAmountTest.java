@@ -14,6 +14,8 @@ class MonetaryAmountTest {
     @Test
     void shouldParseAmount() {
         assertEquals(400, MonetaryAmount.parse("4"));
+        assertEquals(400, MonetaryAmount.parse("4 USD"));
+        assertEquals(400, MonetaryAmount.parse("4$"));
         assertEquals(400, MonetaryAmount.parse("04"));
         assertEquals(400, MonetaryAmount.parse("4.0"));
         assertEquals(400, MonetaryAmount.parse("4.00"));
@@ -22,6 +24,7 @@ class MonetaryAmountTest {
         assertEquals(400, MonetaryAmount.parse("4.005"));
         assertEquals(400, MonetaryAmount.parse("4.00asdf"));
         assertEquals(400, MonetaryAmount.parse("USD 4.005"));
+        assertEquals(400, MonetaryAmount.parse("4.USD"));
         assertEquals(400, MonetaryAmount.parse("$ 4.00"));
         assertEquals(205, MonetaryAmount.parse("2.05"));
         assertEquals(250, MonetaryAmount.parse("2.5"));
@@ -34,6 +37,8 @@ class MonetaryAmountTest {
         assertEquals(-1, MonetaryAmount.parse("USD -0.01"));
         assertEquals(-1, MonetaryAmount.parse("- USD 0.01"));
         assertEquals(-1, MonetaryAmount.parse("-0.01 USD"));
+        assertEquals(-10, MonetaryAmount.parse("-0.1 USD"));
+        assertEquals(10, MonetaryAmount.parse("0.1$"));
         assertEquals(0, MonetaryAmount.parse("0"));
         assertEquals(0, MonetaryAmount.parse("00"));
         assertEquals(0, MonetaryAmount.parse("-0"));
@@ -47,9 +52,6 @@ class MonetaryAmountTest {
     @Test
     void shouldRejectInvalidStrings() {
         assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("abc"));
-        assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("13abc"));
-        assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("13.abc"));
-        assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("13.3bc"));
         assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("--13.3"));
         assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("--"));
         assertThrows(NumberFormatException.class, () -> MonetaryAmount.parse("."));

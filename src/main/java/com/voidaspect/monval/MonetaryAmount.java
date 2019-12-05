@@ -31,38 +31,43 @@ public final class MonetaryAmount {
         int size = value.length();
         if (size == 0) throw new NumberFormatException("Can't parse monetary amount, string is empty");
         int i = 0;
+        char current;
         boolean negative = false;
         long integerPart = 0;
         //skipping non-digit characters, such as $ or EUR
         for (; i < size; i++) {
-            char c = value.charAt(i);
-            int digit = Character.digit(c, 10);
+            current = value.charAt(i);
+            int digit = digit(current);
             if (digit != -1) {
                 integerPart = digit;
                 break;
-            } else if (c == '-') { // parsing sign
+            } else if (current == '-') { // parsing sign
                 if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
                 negative = true;
-            } else if (c == '.') {
+            } else if (current == '.') {
                 throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             }
         }
         if (i == size) throw new NumberFormatException("Can't parse monetary amount, string contains no digits");
         // parsing integer part
         for (i++; i < size; i++) {
-            char c = value.charAt(i);
-            if (c == '.') break;
-            if (c == ' ' || c == ',') continue;
-            integerPart = integerPart * 10 + digit(c);
+            current = value.charAt(i);
+            if (current == '.') break;
+            if (current == ' ' || current == ',') continue;
+            int digit = digit(current);
+            if (digit == -1) return (negative ? -integerPart : integerPart) * 100;
+            integerPart = integerPart * 10 + digit;
         }
         // parsing decimal part
         int decimalPart = 0;
         int decimalDigits = size - i - 1;
         switch (Math.min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
             case 2:
-                decimalPart = digit(value.charAt(i + 2));
+                current = value.charAt(i + 2);
+                decimalPart = Math.max(digit(current), 0);
             case 1:
-                decimalPart += digit(value.charAt(i + 1)) * 10;
+                current = value.charAt(i + 1);
+                decimalPart += Math.max(digit(current), 0) * 10;
         }
         // calculating amount, applying - sign if negative
         long amount = integerPart * 100 + decimalPart;
@@ -125,9 +130,7 @@ public final class MonetaryAmount {
     }
 
     private static int digit(char c) {
-        int digit = Character.digit(c, 10);
-        if (digit == -1) throw new NumberFormatException(c + " is not a valid digit");
-        return digit;
+        return Character.digit(c, 10);
     }
 
 }
