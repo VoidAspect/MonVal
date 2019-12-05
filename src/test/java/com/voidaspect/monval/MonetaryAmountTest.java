@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Currency;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,8 +81,16 @@ class MonetaryAmountTest {
 
     @Test
     void shouldConvertAmountToStringWithCurrencySymbol() {
-        assertEquals("$ 45.45", MonetaryAmount.toStringWithCurrencySymbol(4545, Currency.getInstance("USD")));
-        assertEquals("€ 45.45", MonetaryAmount.toStringWithCurrencySymbol(4545, Currency.getInstance("EUR")));
+        Currency usCurrency = Currency.getInstance(Locale.US);
+        Currency germanCurrency = Currency.getInstance(Locale.GERMANY);
+        assertEquals(
+                usCurrency.getSymbol() + " 45.45",
+                MonetaryAmount.toStringWithCurrencySymbol(4545, usCurrency)
+        );
+        assertEquals(
+                germanCurrency.getSymbol() + " 45.45",
+                MonetaryAmount.toStringWithCurrencySymbol(4545, germanCurrency)
+        );
     }
 
     @Test
