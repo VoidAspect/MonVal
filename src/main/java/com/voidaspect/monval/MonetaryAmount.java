@@ -2,7 +2,6 @@ package com.voidaspect.monval;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.Currency;
 
 import static java.lang.Math.max;
@@ -114,7 +113,7 @@ public final class MonetaryAmount {
     }
 
     public static long from(BigDecimal amount) {
-        return amount.setScale(2, RoundingMode.DOWN).unscaledValue().longValue();
+        return amount.movePointRight(2).longValue();
     }
 
     public static long from(BigInteger amount) {
@@ -130,11 +129,12 @@ public final class MonetaryAmount {
     }
 
     private static char digit(int digit) {
-        return Character.forDigit(digit, 10);
+        return (char) ('0' + digit);
     }
 
     private static int digit(char c) {
-        return Character.digit(c, 10);
+        int delta = c - '0';
+        return delta <= 9 && delta >= 0 ? delta : -1;
     }
 
 }
