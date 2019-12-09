@@ -41,6 +41,14 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub VoidAspect Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/VoidAspect/MonVal</url>
+        </repository>
+    </distributionManagement>
+
     <issueManagement>
         <system>github</system>
         <url>https://github.com/VoidAspect/MonVal/issues</url>
