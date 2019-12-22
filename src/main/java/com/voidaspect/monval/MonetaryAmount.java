@@ -32,17 +32,40 @@ public final class MonetaryAmount {
     public static long parse(CharSequence value) {
         int size = value.length();
         if (size == 0) throw new NumberFormatException("Can't parse monetary amount, string is empty");
-        int i;
         char current;
         boolean negative = false;
-        long integerPart = 0;
         //skipping non-digit characters, such as $ or EUR
-        for (i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             current = value.charAt(i);
             int digit = digit(current);
             if (digit != -1) {
-                integerPart = digit;
-                break;
+                // first digit detected
+                long integerPart = digit;
+                // parsing integer part
+                for (i++; i < size; i++) {
+                    current = value.charAt(i);
+                    if (current == '.') break;
+                    digit = digit(current);
+                    if (digit == -1) {
+                        if (current != ' ' && current != ',') return (negative ? -integerPart : integerPart) * 100;
+                    } else {
+                        integerPart = integerPart * 10 + digit;
+                    }
+                }
+                // parsing decimal part
+                int decimalPart = 0;
+                int decimalDigits = size - i - 1;
+                switch (min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
+                    case 2:
+                        current = value.charAt(i + 2);
+                        decimalPart = max(digit(current), 0);
+                    case 1:
+                        current = value.charAt(i + 1);
+                        decimalPart += max(digit(current), 0) * 10;
+                }
+                // calculating amount
+                long amount = integerPart * 100 + decimalPart;
+                return negative ? -amount : amount;
             } else if (current == '-') { // parsing sign
                 if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
                 negative = true;
@@ -50,34 +73,7 @@ public final class MonetaryAmount {
                 throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             }
         }
-        if (i == size) {
-            throw new NumberFormatException("Can't parse monetary amount, string '" + value + "' contains no digits");
-        }
-        // parsing integer part
-        for (i++; i < size; i++) {
-            current = value.charAt(i);
-            if (current == '.') break;
-            int digit = digit(current);
-            if (digit == -1) {
-                if (current != ' ' && current != ',') return (negative ? -integerPart : integerPart) * 100;
-            } else {
-                integerPart = integerPart * 10 + digit;
-            }
-        }
-        // parsing decimal part
-        int decimalPart = 0;
-        int decimalDigits = size - i - 1;
-        switch (min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
-            case 2:
-                current = value.charAt(i + 2);
-                decimalPart = max(digit(current), 0);
-            case 1:
-                current = value.charAt(i + 1);
-                decimalPart += max(digit(current), 0) * 10;
-        }
-        // calculating amount
-        long amount = integerPart * 100 + decimalPart;
-        return negative ? -amount : amount;
+        throw new NumberFormatException("Can't parse monetary amount, string '" + value + "' contains no digits");
     }
 
     public static String toString(long amount) {
