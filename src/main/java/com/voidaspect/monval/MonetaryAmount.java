@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Currency;
 
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
@@ -32,12 +31,16 @@ public final class MonetaryAmount {
     public static long parse(CharSequence value) {
         int size = value.length();
         if (size == 0) throw new NumberFormatException("Can't parse monetary amount, string is empty");
-        char current;
         boolean negative = false;
         //skipping non-digit characters, such as $ or EUR
         for (int i = 0; i < size; i++) {
-            current = value.charAt(i);
-            int digit = digit(current);
+            char current = value.charAt(i);
+            if (current == '-') { // parsing sign
+                if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
+                negative = true;
+                continue;
+            }
+            int digit = digit(current, -1);
             if (digit != -1) {
                 // first digit detected
                 long integerPart = digit;
@@ -45,7 +48,7 @@ public final class MonetaryAmount {
                 for (i++; i < size; i++) {
                     current = value.charAt(i);
                     if (current == '.') break;
-                    digit = digit(current);
+                    digit = digit(current, -1);
                     if (digit == -1) {
                         if (current != ' ' && current != ',') return (negative ? -integerPart : integerPart) * 100;
                     } else {
@@ -58,18 +61,16 @@ public final class MonetaryAmount {
                 switch (min(decimalDigits, 2)) { // monetary values only have 2 decimal digits
                     case 2:
                         current = value.charAt(i + 2);
-                        decimalPart = max(digit(current), 0);
+                        decimalPart = digit(current, 0);
                     case 1:
                         current = value.charAt(i + 1);
-                        decimalPart += max(digit(current), 0) * 10;
+                        decimalPart += digit(current, 0) * 10;
                 }
                 // calculating amount
                 long amount = integerPart * 100 + decimalPart;
                 return negative ? -amount : amount;
-            } else if (current == '-') { // parsing sign
-                if (negative) throw new NumberFormatException("Only one minus sign is allowed, string: " + value);
-                negative = true;
-            } else if (current == '.') {
+            }
+            if (current == '.') {
                 throw new NumberFormatException("Decimal point found before the any digits, string: " + value);
             }
         }
@@ -128,9 +129,9 @@ public final class MonetaryAmount {
         return (char) ('0' + digit);
     }
 
-    private static int digit(char c) {
+    private static int digit(char c, int fallback) {
         int delta = c - '0';
-        return delta <= 9 && delta >= 0 ? delta : -1;
+        return delta <= 9 && delta >= 0 ? delta : fallback;
     }
 
 }
